@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>iframe tester</title>
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/reset-2.0.min.css">
+
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Kiara MPC Radio </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  transition: background 1s ease;
+}
+
+#player {
+  width: 90%;
+  max-width: 360px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 25px;
+  background: rgba(0,0,0,0.3);
+  box-shadow: 0 0 25px rgba(255,255,255,0.15);
+}
+
+/* 🎵 COVER + NEON GLOW */
+.cover-wrapper {
+  position: relative;
+  width: 75vw;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cover-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#00ffff, #ff00ff, #00ff99, #00ffff);
+  animation: rotate 6s linear infinite, pulseGlow 1.5s ease-in-out infinite alternate;
+  filter: blur(10px);
+  z-index: 0;
+}
+#cover {
+  width: 88%;
+  height: 88%;
+  border-radius: 20px;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 20px rgba(255,255,255,0.5);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.fade-in { opacity: 1 !important; }
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes pulseGlow {
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
+/* 📝 Text */
+h2, h3 {
+  transition: opacity 0.8s ease;
+  opacity: 0;
+  margin: 0;
+}
+.fade-text { opacity: 1 !important; }
+
+h2 {
+  font-size: 1.4em;
+  margin: 20px 0 5px;
+}
+h3 {
+  font-size: 1em;
+  margin: 0 0 15px;
+  opacity: 0.9;
+}
+
+.live {
+  color: white;
+  font-weight: bold;
+  font-size: 0.95em;
+  margin-top: 5px;
+  text-shadow: 0 0 5px rgba(255,255,255,0.8),
+               0 0 10px rgba(255,255,255,0.6),
+               0 0 20px rgba(255,255,255,0.4);
+  letter-spacing: 0.5px;
+}
+
+/* 🎛️ Controls */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+button {
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+button:hover {
+  background: #00ffcc;
+  color: #000;
+}
+
+/* 📱 Responsiveness */
+@media (max-width: 480px) {
+  #player { padding: 20px; margin: 30px auto; }
+  h2 { font-size: 1.2em; }
+  h3 { font-size: 0.9em; }
+  .live { font-size: 0.85em; }
+  button {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1em;
+  }
+}
+@media (max-width: 340px) {
+  #player { padding: 15px; }
+  .cover-wrapper { width: 85vw; }
+  button { width: 40px; height: 40px; }
+}
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div class="cover-wrapper">
+    <div class="cover-ring"></div>
+    <img id="cover" src="http://cdn.theradiohub.com/logos/157.jpg" alt="cover">
+  </div>
+  <h2 id="title">Kiara MPC Radio</h2>
+  <h3 id="artist">Streaming Live</h3>
+  <div class="live">LIVE. Kiara MPC Radio</div>
+  <div class="controls">
+    <button id="play">▶</button>
+    <button id="stop">⏹</button>
+    <button id="refresh">⟳</button>
+  </div>
+  <audio id="audio" preload="none"></audio>
+</div>
+
+<script>
+const streamURL = "https://mpc1.mediacp.eu/stream/kiara-radio";
+const apiURL = "https://mpc1.mediacp.eu:2000/json/stream/kiara-radio";
+const fallbackCover = "http://cdn.theradiohub.com/logos/157.jpg";
+
+const audio = document.getElementById("audio");
+const playBtn = document.getElementById("play");
+const stopBtn = document.getElementById("stop");
+const refreshBtn = document.getElementById("refresh");
+const cover = document.getElementById("cover");
+const titleEl = document.getElementById("title");
+const artistEl = document.getElementById("artist");
+
+audio.src = streamURL;
+let isPlaying = false;
+let lastTrack = "";
+
+playBtn.onclick = () => {
+  if (isPlaying) {
+    audio.pause();
+    playBtn.textContent = "▶";
+  } else {
+    audio.play();
+    playBtn.textContent = "⏸";
+  }
+  isPlaying = !isPlaying;
+};
+
+stopBtn.onclick = () => {
+  audio.pause();
+  audio.currentTime = 0;
+  playBtn.textContent = "▶";
+  isPlaying = false;
+};
+
+refreshBtn.onclick = () => fetchNowPlaying(true);
+
+async function fetchNowPlaying(force = false) {
+  try {
+    const res = await fetch(apiURL + "?_=" + Date.now(), { cache: "no-store" });
+    const data = await res.json();
+
+    // data.nowplaying = "Elton John - Sacrifice"
+    let np = data.nowplaying || "";
+    let artist = "Unknown Artist";
+    let title = np;
+
+    if (np.includes(" - ")) {
+      const parts = np.split(" - ");
+      artist = parts[0].trim();
+      title = parts[1].trim();
+    }
+
+    const currentTrack = artist + " - " + title;
+    if (!force && currentTrack === lastTrack) return;
+    lastTrack = currentTrack;
+
+    // ambil cover dari JSON langsung
+    let img = data.coverart || "";
+
+    // fallback ke iTunes kalau tidak ada
+    if (!img) {
+      try {
+        const it = await fetch(
+          `https://itunes.apple.com/search?term=${encodeURIComponent(artist + " " + title)}&limit=1`,
+          { cache: "no-store" }
+        );
+        const itData = await it.json();
+        if (itData.results?.length > 0) {
+          img = itData.results[0].artworkUrl100.replace("100x100", "600x600");
+        }
+      } catch {}
+    }
+
+    // transisi halus
+    cover.classList.remove("fade-in");
+    titleEl.classList.remove("fade-text");
+    artistEl.classList.remove("fade-text");
+
+    setTimeout(() => {
+      cover.src = img || fallbackCover;
+      titleEl.textContent = title;
+      artistEl.textContent = artist;
+      cover.classList.add("fade-in");
+      titleEl.classList.add("fade-text");
+      artistEl.classList.add("fade-text");
+      changeBackgroundColor(title + artist);
+    }, 400);
+  } catch (e) {
+    console.error("Error fetching nowplaying:", e);
+  }
+}
+
+// 🌈 Background berganti otomatis
+const colors = [
+  'linear-gradient(135deg,#667eea,#764ba2)',
+  'linear-gradient(135deg,#f093fb,#f5576c)',
+  'linear-gradient(135deg,#4facfe,#00f2fe)',
+  'linear-gradient(135deg,#fa709a,#fee140)',
+  'linear-gradient(135deg,#30cfd0,#330867)'
+];
+let colorIndex = 0;
+function cycleBackground() {
+  colorIndex = (colorIndex + 1) % colors.length;
+  document.body.style.background = colors[colorIndex];
+}
+setInterval(cycleBackground, 15000);
+
+function changeBackgroundColor(seed) {
+  const idx = Math.abs(seed.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % colors.length;
+  document.body.style.background = colors[idx];
+}
+
+fetchNowPlaying(true);
+setInterval(fetchNowPlaying, 10000);
+</script>
+
+</body>
+</html>
+    
+  </body>
+  
+</html>
