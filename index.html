@@ -149,6 +149,16 @@ button:hover {
   .cover-wrapper { width: 85vw; }
   button { width: 40px; height: 40px; }
 }
+  .credit {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(255,255,255,0.6);
+  z-index: 999;
+  pointer-events: none; /* supaya tidak mengganggu klik */
+}
 </style>
 </head>
 <body>
@@ -168,7 +178,7 @@ button:hover {
   </div>
   <audio id="audio" preload="none"></audio>
 </div>
-
+<div class="credit">prepared by Juneid</div>
 <script>
 const streamURL = "https://mpc1.mediacp.eu/stream/kiara-radio";
 const apiURL = "https://mpc1.mediacp.eu:2000/json/stream/kiara-radio";
